@@ -2,4 +2,23 @@
   <p>
     Hello, world!
   </p>
+  <table>
+    <tr>
+      <th>service</th>
+      <th>status</th>
+    </tr>
+    <tr>
+      <td>github.com</td>
+      <td id="github-status">{{result}}</td>
+    </tr>
+  </table>
+  <script>
+    fetch('https://github.com')
+      .then(response => {
+        document.getElementById('github-status').innerText = response.status;
+      })
+      .catch(error => {
+        document.getElementById('github-status').innerText = 'Error: ' + error;
+      });
+  </script>
 </body>
