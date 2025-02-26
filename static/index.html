@@ -13,7 +13,9 @@
     </tr>
   </table>
   <script>
-    fetch('https://github.com')
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const url = 'https://github.com';
+    fetch(corsProxy + url)
       .then(response => {
         document.getElementById('github-status').innerText = response.status;
       })
