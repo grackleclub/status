@@ -51,10 +51,7 @@ func main() {
 		panic(fmt.Errorf("exec migrations: %w", err))
 	}
 
-	var targets = []string{
-		"https://www.google.com",
-		"https://api.grackle.club",
-	}
+	// continue to check async and write to db
 	go statusesForever(ctx, targets, intervalDefault)
 
 	// listen and serve

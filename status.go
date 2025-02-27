@@ -10,6 +10,12 @@ import (
 	"github.com/grackleclub/status/sql/db"
 )
 
+var targets = []string{
+	"https://api.grackle.club",
+	"https://katlukens.com",
+	"https://turkosaur.us",
+}
+
 type result struct {
 	Url        string // http url
 	StatusCode int    // http status code (or 0 if error)

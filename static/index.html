@@ -25,6 +25,40 @@
     section {
       padding: 2em;
     }
+    .timeline {
+      display: flex;
+      overflow-x: auto;
+      padding: 0.2em 0;
+    }
+    .timeline-item {
+      flex: 0 0 auto;
+      width: 1em;
+      height: 1em;
+      margin-right: 1em;
+      padding: 1em;
+      border: 1px solid yellow;
+      border-radius: 1em;
+      background-color: black;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .timeline-item:last-child {
+      margin-right: 0;
+    }
+    .up {
+      background-color: cyan;
+    }
+    .down {
+      background-color: red
+    }
+    .partial {
+      background-color: orange
+    }
+    .unknown {
+      background-color: grey
+    }
   </style>
 </head>
 
@@ -37,30 +71,33 @@
     <h2>
       {{ $url }}
     </h2>
-    <table>
-      <tr>
-        <th>Time</th>
-        <th>Ups</th>
-        <th>Downs</th>
-        <th>Status</th>
-      </tr>
+    <div class="timeline">
       {{ range $pings := $pingsList }}
-      <tr>
-        <td>{{ $pings.Time.Format "Mon 15:04" }}</td>
-        <td>{{ $pings.Ups }}</td>
-        <td>{{ $pings.Downs }}</td>
+      <div
+        class="timeline-item" 
+        title='{{ $pings.Time.Format "Mon 15:04" }}'
         {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
-        <td>No data available</td>
+        class="unknown"
         {{ else if eq $pings.Ups 0 }}
-        <td>down</td>
+        class="down"
         {{ else if eq $pings.Downs 0 }}
-        <td>up</td>
+        class="up"
         {{ else }}
-        <td>intermittent (  {{- $pings.Ups }}/{{ $pings.Ups -}} )</td>
+        class="partial"
         {{ end }}
-      </tr>
+        >
+        {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
+        <p class="unkown" title="unknown">🤷</p>
+        {{ else if eq $pings.Ups 0 }}
+        <p class="down" title="down">❌</p>
+        {{ else if eq $pings.Downs 0 }}
+        <p class="up" title="up">🟢</p>
+        {{ else }}
+        <p class="partial" title="{{ $pings.Ups }} of {{ $pings.Downs }}">😕</p>
+        {{ end }}
+      </div>
       {{ end }}
-    </table>
+    </div>
   {{ end }}
   </section>
 
