@@ -20,9 +20,10 @@ import (
 var static embed.FS
 
 var (
-	queries     *db.Queries
-	dbStr       = "file:status.db?cache=shared&mode=rw"
-	portDefault = "8888"
+	queries         *db.Queries
+	dbStr           = "file:status.db?cache=shared&mode=rw"
+	portDefault     = "8888"
+	intervalDefault = 5 * time.Minute
 )
 
 func init() {
@@ -53,10 +54,8 @@ func main() {
 	var targets = []string{
 		"https://www.google.com",
 		"https://api.grackle.club",
-		// "https://fake.grackle.club",
 	}
-
-	go statusesForever(ctx, targets, 5*time.Second)
+	go statusesForever(ctx, targets, intervalDefault)
 
 	// listen and serve
 	port, ok := os.LookupEnv("PORT")
@@ -77,7 +76,7 @@ func serve(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("request",
 		"url", r.URL.Path,
 		"method", r.Method,
-		"remote", r.RemoteAddr,
+		"address", r.RemoteAddr,
 	)
 
 	p := db.StatusesParams{
