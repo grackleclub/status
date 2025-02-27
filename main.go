@@ -131,3 +131,5 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// TODO consolidate into hour chunks
