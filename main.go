@@ -16,6 +16,9 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// lookback defines how many hourly chunks should be included in display
+const lookback int = 48
+
 //go:embed static
 var static embed.FS
 
@@ -143,7 +146,37 @@ func serve(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
+	// Generate time values starting from the current hour and going back an hour each time
+	now := time.Now().UTC().Truncate(time.Hour)
+	var timesInRange []time.Time
+	for i := range lookback {
+		timesInRange = append(timesInRange, now.Add(-time.Duration(i)*time.Hour).Truncate(time.Hour))
+	}
+	slog.Info("generated lookback table", "data", timesInRange)
+
+	// Fill in empty space,
+	// chunks are usually an hour
+	for url, chunk := range rpts {
+		slog.Debug("one", "k", url, "report", chunk)
+		for _, interval := range timesInRange {
+			var exists bool
+			for _, ping := range chunk {
+				if ping.Time.Truncate(time.Hour) == interval.Truncate(time.Hour) {
+					exists = true
+				}
+			}
+			if !exists {
+				slog.Debug("adding empty slot", "url", url, "interval", interval)
+				chunk = append(chunk, pings{Time: interval, Ups: 0, Downs: 0})
+			}
+			rpts[url] = chunk
+		}
+	}
 	pageData.Report = rpts
+
+	// TODO make empty unkown slots for existing services
+	// for every services that was up since
 
 	var rawPages []rows
 	for _, s := range statuses {
@@ -166,9 +199,6 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "oops, something went wrong", http.StatusInternalServerError)
 		return
 	}
-	for _, r := range pageData.Rows {
-		slog.Debug("results", "r", r)
-	}
 	err = tmpl.Execute(w, pageData)
 	if err != nil {
 		slog.Error(
@@ -179,5 +209,3 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-// TODO consolidate into hour chunks
