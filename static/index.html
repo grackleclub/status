@@ -34,7 +34,7 @@
       <th>status</th>
       <th>rtt (ms)</th>
     </tr>
-    {{ range . }}
+    {{ range .Rows }}
     <tr>
       <td>{{.Time}}</td>
       <td>{{.Url}}</td>
@@ -43,4 +43,31 @@
     </tr>
     {{ end }}
   </table>
+
+  <section>
+  {{ range $url, $blocks := .Report }}
+    <h2>
+      {{ $url }}
+    </h2>
+    <table>
+      <tr>
+        <th>Time</th>
+        <th>Ups</th>
+        <th>Downs</th>
+      </tr>
+      {{ range $time, $pings := $blocks }}
+
+      <tr>
+        <td>{{ $time }}</td>
+        <td>{{ $pings.Ups }}</td>
+        <td>{{ $pings.Downs }}</td>
+      </tr>
+
+      {{ end }}
+    </table>
+  {{ end }}
+
+  </section>
+
+
 </body>

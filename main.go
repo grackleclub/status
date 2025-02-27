@@ -93,21 +93,57 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type rslt struct {
+	type pings struct {
+		Ups   int
+		Downs int
+	}
+	// blocks of time (probably hourly) with lots of pings inside
+	type blocks map[time.Time]pings
+	// a map indexed on identifier (probably URL)
+	type report map[string]blocks
+
+	type rows struct {
 		Time string
 		Url  string
 		Code int
 		Rtt  int
 	}
-	var results []rslt
+	type page struct {
+		Report report
+		Rows   []rows
+	}
+	var pageData page
+
+	var rpts = make(report)
 	for _, s := range statuses {
-		results = append(results, rslt{
+		if _, ok := rpts[s.Url]; !ok {
+			rpts[s.Url] = make(blocks)
+		}
+		roundedTime := s.Ts.Truncate(time.Hour)
+		if _, ok := rpts[s.Url][roundedTime]; !ok {
+			rpts[s.Url][roundedTime] = pings{}
+		}
+		p := rpts[s.Url][roundedTime]
+		if s.StatusCode == http.StatusOK {
+			p.Ups++
+		} else {
+			p.Downs++
+		}
+		rpts[s.Url][roundedTime] = p
+	}
+	pageData.Report = rpts
+
+	var rawPages []rows
+	for _, s := range statuses {
+
+		rawPages = append(rawPages, rows{
 			Time: s.Ts.Format(time.RFC3339),
 			Url:  s.Url,
 			Code: int(s.StatusCode),
 			Rtt:  int(s.ResponseMs),
 		})
 	}
+	pageData.Rows = rawPages
 
 	tmpl, err := template.ParseFS(static, path.Join("static", "index.html"))
 	if err != nil {
@@ -118,10 +154,10 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "oops, something went wrong", http.StatusInternalServerError)
 		return
 	}
-	for _, r := range results {
+	for _, r := range pageData.Rows {
 		slog.Debug("results", "r", r)
 	}
-	err = tmpl.Execute(w, results)
+	err = tmpl.Execute(w, pageData)
 	if err != nil {
 		slog.Error(
 			"template execute failed",
