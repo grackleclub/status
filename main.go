@@ -94,13 +94,14 @@ func serve(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type pings struct {
+		Time  time.Time
 		Ups   int
 		Downs int
 	}
 	// blocks of time (probably hourly) with lots of pings inside
-	type blocks map[time.Time]pings
+	// type blocks map[time.Time]pings
 	// a map indexed on identifier (probably URL)
-	type report map[string]blocks
+	type report map[string][]pings
 
 	type rows struct {
 		Time string
@@ -116,20 +117,34 @@ func serve(w http.ResponseWriter, r *http.Request) {
 
 	var rpts = make(report)
 	for _, s := range statuses {
-		if _, ok := rpts[s.Url]; !ok {
-			rpts[s.Url] = make(blocks)
+		hour := s.Ts.Truncate(time.Hour)
+		p := pings{Time: hour}
+		if len(rpts[s.Url]) == 0 {
+			rpts[s.Url] = []pings{p}
+		} else {
+			found := false
+			for i := range rpts[s.Url] {
+				if rpts[s.Url][i].Time == hour {
+					p = rpts[s.Url][i]
+					found = true
+					break
+				}
+			}
+			if !found {
+				rpts[s.Url] = append(rpts[s.Url], p)
+			}
 		}
-		roundedTime := s.Ts.Truncate(time.Hour)
-		if _, ok := rpts[s.Url][roundedTime]; !ok {
-			rpts[s.Url][roundedTime] = pings{}
-		}
-		p := rpts[s.Url][roundedTime]
 		if s.StatusCode == http.StatusOK {
 			p.Ups++
 		} else {
 			p.Downs++
 		}
-		rpts[s.Url][roundedTime] = p
+		for i := range rpts[s.Url] {
+			if rpts[s.Url][i].Time == hour {
+				rpts[s.Url][i] = p
+				break
+			}
+		}
 	}
 	pageData.Report = rpts
 

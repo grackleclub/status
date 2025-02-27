@@ -22,30 +22,18 @@
     td {
       text-align: left;
     }
+    section {
+      padding: 2em;
+    }
   </style>
 </head>
+
 <body>
   <h1>Status Page</h1>
   <h2>Grackle Club</h2>
-  <table>
-    <tr>
-      <th>time</th>
-      <th>service</th>
-      <th>status</th>
-      <th>rtt (ms)</th>
-    </tr>
-    {{ range .Rows }}
-    <tr>
-      <td>{{.Time}}</td>
-      <td>{{.Url}}</td>
-      <td>{{.Code}}</td>
-      <td>{{.Rtt}}</td>
-    </tr>
-    {{ end }}
-  </table>
 
   <section>
-  {{ range $url, $blocks := .Report }}
+  {{ range $url, $pingsList := .Report }}
     <h2>
       {{ $url }}
     </h2>
@@ -54,20 +42,47 @@
         <th>Time</th>
         <th>Ups</th>
         <th>Downs</th>
+        <th>Status</th>
       </tr>
-      {{ range $time, $pings := $blocks }}
-
+      {{ range $pings := $pingsList }}
       <tr>
-        <td>{{ $time }}</td>
+        <td>{{ $pings.Time.Format "Mon 15:04" }}</td>
         <td>{{ $pings.Ups }}</td>
         <td>{{ $pings.Downs }}</td>
+        {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
+        <td>No data available</td>
+        {{ else if eq $pings.Ups 0 }}
+        <td>down</td>
+        {{ else if eq $pings.Downs 0 }}
+        <td>up</td>
+        {{ else }}
+        <td>intermittent (  {{- $pings.Ups }}/{{ $pings.Ups -}} )</td>
+        {{ end }}
       </tr>
-
       {{ end }}
     </table>
   {{ end }}
-
   </section>
 
-
+  <section>
+    <details>
+      <summary>Show all data</summary>
+      <table>
+        <tr>
+          <th>time</th>
+          <th>service</th>
+          <th>status</th>
+          <th>rtt (ms)</th>
+        </tr>
+        {{ range .Rows }}
+        <tr>
+          <td>{{.Time}}</td>
+          <td>{{.Url}}</td>
+          <td>{{.Code}}</td>
+          <td>{{.Rtt}}</td>
+        </tr>
+        {{ end }}
+      </table>
+    </details>
+  </section>
 </body>
