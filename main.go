@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sort"
 	"text/template"
 	"time"
 
@@ -170,10 +171,18 @@ func serve(w http.ResponseWriter, r *http.Request) {
 				slog.Debug("adding empty slot", "url", url, "interval", interval)
 				chunk = append(chunk, pings{Time: interval, Ups: 0, Downs: 0})
 			}
-			rpts[url] = chunk
 		}
+		rpts[url] = chunk
 	}
 	pageData.Report = rpts
+
+	// sort every time frame by time, new to old
+	for url, chunk := range rpts {
+		sort.Slice(chunk, func(i, j int) bool {
+			return chunk[i].Time.After(chunk[j].Time)
+		})
+		rpts[url] = chunk
+	}
 
 	// TODO make empty unkown slots for existing services
 	// for every services that was up since

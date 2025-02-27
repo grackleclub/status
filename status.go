@@ -13,6 +13,7 @@ import (
 var targets = []string{
 	"https://api.grackle.club",
 	"https://katlukens.com",
+	"https://drawdice.katlukens.com",
 	"https://turkosaur.us",
 }
 
@@ -25,7 +26,7 @@ type result struct {
 
 // status is a single blocking url check
 func status(url string) (int, int, error) {
-	start := time.Now()
+	start := time.Now().UTC()
 	resp, err := http.Get(url)
 	if err != nil {
 		return 0, int(time.Since(start).Milliseconds()), err
@@ -67,6 +68,7 @@ func statuses(ctx context.Context, urls []string) error {
 	return nil
 }
 
+// statusesForever checks all 'urls' at once, async, every 'interval' duration.
 func statusesForever(ctx context.Context, urls []string, interval time.Duration) {
 	for {
 		err := statuses(ctx, urls)

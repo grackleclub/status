@@ -8,6 +8,9 @@
       text-align: center;
       size: 4em;
     }
+    a {
+      color: cyan;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -86,13 +89,13 @@
         {{ end }}
         >
         {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
-        <p class="unkown" title='unknown at {{ $pings.Time.Format "Mon 15:04" }}'>🤷</p>
+        <p class="unkown" title='unknown at {{ $pings.Time.Format "Mon 15:04" }}'>◾</p>
         {{ else if eq $pings.Ups 0 }}
         <p class="down" title=' down at {{ $pings.Time.Format "Mon 15:04" }}'>❌</p>
         {{ else if eq $pings.Downs 0 }}
         <p class="up" title='up at {{ $pings.Time.Format "Mon 15:04" }}'>🟢</p>
         {{ else }}
-        <p class="partial" title='{{ $pings.Ups }} of {{ $pings.Downs }} availability at {{ $pings.Time.Format "Mon 15:04" }}'>😕</p>
+        <p class="partial" title='{{ $pings.Ups }} of {{ $pings.Downs }} availability at {{ $pings.Time.Format "Mon 15:04" }}'>🟨</p>
         {{ end }}
       </div>
       {{ end }}
