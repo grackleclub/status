@@ -28,6 +28,10 @@
     section {
       padding: 2em;
     }
+
+    .site {
+      text-decoration: none;
+    }
     .timeline {
       display: flex;
       overflow-x: auto;
@@ -40,7 +44,7 @@
       margin-right: 0.2em;
       padding: 0;
       border-radius: 50%;
-      background-color: black;
+      /* background-color: black; */
       text-align: center;
       display: flex;
       align-items: center;
@@ -51,15 +55,19 @@
     }
     .up {
       background-color: cyan;
+      border-radius: 50%;
     }
     .down {
       background-color: red;
+      border-radius: 50%;
     }
     .partial {
       background-color: orange;
+      border-radius: 50%;
     }
-    .unknown {
+    .unknown { 
       background-color: grey;
+      border-radius: 50%; 
     }
   </style>
 </head>
@@ -71,25 +79,26 @@
   <section>
   {{ range $url, $pingsList := .Report }}
     <h2>
-      <a href="{{ $url }}">{{ $url }}</a>
+      <a class="site" href="{{ $url }}">{{ $url }}</a>
     </h2>
     <div class="timeline">
       {{ range $pings := $pingsList }}
       <div
-        class="timeline-item" 
         title='{{ $pings.Time.Format "Mon 15:04" }}'
+        class="timeline-item 
         {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
-        class="unknown"
+        unknown
         {{ else if eq $pings.Ups 0 }}
-        class="down"
+        down
         {{ else if eq $pings.Downs 0 }}
-        class="up"
+        up
         {{ else }}
-        class="partial"
+        partial
         {{ end }}
+        "
         >
         {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
-        <p class="unkown" title='unknown at {{ $pings.Time.Format "Mon 15:04" }}'>◾</p>
+        <p class="unkown" title='unknown at {{ $pings.Time.Format "Mon 15:04" }}'>⚫</p>
         {{ else if eq $pings.Ups 0 }}
         <p class="down" title=' down at {{ $pings.Time.Format "Mon 15:04" }}'>❌</p>
         {{ else if eq $pings.Downs 0 }}
