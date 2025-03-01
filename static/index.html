@@ -4,9 +4,13 @@
       background-color: rebeccapurple;
       color: yellow;
     }
-    h1, h2 {
+    h1 {
       text-align: center;
-      size: 4em;
+      font-size: 2.5rem;
+    }
+    h2 {
+      text-align: center;
+      font-size: 1.75rem;
     }
     a {
       color: cyan;
@@ -27,6 +31,14 @@
     }
     section {
       padding: 2em;
+      text-align: left;
+    }
+
+    .site {
+      text-decoration: none;
+      text-align: left;
+      display: block;
+      font-size: 1.75rem;
     }
     .timeline {
       display: flex;
@@ -34,23 +46,31 @@
       padding: 0.2em 0;
     }
     .timeline-item {
-      flex: 0 0 auto;
-      width: 1em;
-      height: 1em;
-      margin-right: 0.2em;
-      padding: 0;
-      border-radius: 50%;
-      background-color: black;
-      text-align: center;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      width: .5rem;
+      height: 4rem;
+      margin-right: .1rem;
+      position: relative;
     }
     .timeline-item:last-child {
       margin-right: 0;
     }
+    .timeline-item[title]:hover::after {
+      content: attr(title);
+      background-color: #333;
+      color: #fff;
+      padding: 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      z-index: 10;
+      top: -1.5em;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 10;
+    }
     .up {
-      background-color: cyan;
+      background-color: greenyellow;
     }
     .down {
       background-color: red;
@@ -58,8 +78,8 @@
     .partial {
       background-color: orange;
     }
-    .unknown {
-      background-color: grey;
+    .unknown { 
+      background-color: #2b2a33;
     }
   </style>
 </head>
@@ -71,31 +91,32 @@
   <section>
   {{ range $url, $pingsList := .Report }}
     <h2>
-      <a href="{{ $url }}">{{ $url }}</a>
+      <a class="site" href="{{ $url }}">{{ $url }}</a>
     </h2>
     <div class="timeline">
       {{ range $pings := $pingsList }}
       <div
-        class="timeline-item" 
         title='{{ $pings.Time.Format "Mon 15:04" }}'
+        class="timeline-item 
         {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
-        class="unknown"
+        unknown
         {{ else if eq $pings.Ups 0 }}
-        class="down"
+        down
         {{ else if eq $pings.Downs 0 }}
-        class="up"
+        up
         {{ else }}
-        class="partial"
+        partial
         {{ end }}
+        "
         >
         {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
-        <p class="unkown" title='unknown at {{ $pings.Time.Format "Mon 15:04" }}'>◾</p>
+        <div class="unknown" title='unknown at {{ $pings.Time.Format "Mon 15:04" }}'></div>
         {{ else if eq $pings.Ups 0 }}
-        <p class="down" title=' down at {{ $pings.Time.Format "Mon 15:04" }}'>❌</p>
+        <div class="down" title='down at {{ $pings.Time.Format "Mon 15:04" }}'></div>
         {{ else if eq $pings.Downs 0 }}
-        <p class="up" title='up at {{ $pings.Time.Format "Mon 15:04" }}'>🟢</p>
+        <div class="up" title='up at {{ $pings.Time.Format "Mon 15:04" }}'></div>
         {{ else }}
-        <p class="partial" title='{{ $pings.Ups }} of {{ $pings.Downs }} availability at {{ $pings.Time.Format "Mon 15:04" }}'>🟨</p>
+        <div class="partial" title='{{ $pings.Ups }} of {{ $pings.Downs }} availability at {{ $pings.Time.Format "Mon 15:04" }}'></div>
         {{ end }}
       </div>
       {{ end }}
