@@ -1,2 +1,2 @@
 # status
-status page independent from infrastructure
+status page for organization services
