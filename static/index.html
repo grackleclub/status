@@ -55,8 +55,8 @@
     .timeline-item:last-child {
       margin-right: 0;
     }
-    .timeline-item[title]:hover::after {
-      content: attr(title);
+    .timeline-item[aria-label]:hover::after {
+      content: attr(aria-label);
       background-color: #333;
       color: #fff;
       padding: 5px;
@@ -67,7 +67,8 @@
       left: 50%;
       transform: translateX(-50%);
       pointer-events: none;
-      z-index: 10;
+      line-height: 1;
+      max-height: 1.5em;
     }
     .up {
       background-color: greenyellow;
@@ -96,7 +97,18 @@
     <div class="timeline">
       {{ range $pings := $pingsList }}
       <div
-        title='{{ $pings.Time.Format "Mon 15:04" }}'
+        aria-label='{{ $pings.Time.Format "Mon 15:04" }}: 
+        {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) -}}
+        unknown
+        {{- else if eq $pings.Ups 0 -}}
+        down
+        {{- else if eq $pings.Downs 0 -}}
+        up
+        {{- else -}}
+        partial
+        {{- end }} ({{ $pings.Ups }}/{{ $pings.Total -}})
+        '
+
         class="timeline-item 
         {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
         unknown
@@ -109,15 +121,7 @@
         {{ end }}
         "
         >
-        {{ if and (eq $pings.Ups 0) (eq $pings.Downs 0) }}
-        <div class="unknown" title='unknown at {{ $pings.Time.Format "Mon 15:04" }}'></div>
-        {{ else if eq $pings.Ups 0 }}
-        <div class="down" title='down at {{ $pings.Time.Format "Mon 15:04" }}'></div>
-        {{ else if eq $pings.Downs 0 }}
-        <div class="up" title='up at {{ $pings.Time.Format "Mon 15:04" }}'></div>
-        {{ else }}
-        <div class="partial" title='{{ $pings.Ups }} of {{ $pings.Downs }} availability at {{ $pings.Time.Format "Mon 15:04" }}'></div>
-        {{ end }}
+        <div></div>
       </div>
       {{ end }}
     </div>

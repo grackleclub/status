@@ -18,10 +18,13 @@ import (
 )
 
 // lookback defines how many hourly chunks should be included in display
-const lookback int = 48
+const lookback int = 24 * 4
 
 //go:embed static
 var static embed.FS
+
+//go:embed sql/schema.sql
+var schema embed.FS
 
 var (
 	queries         *db.Queries
@@ -47,7 +50,7 @@ func main() {
 	defer conn.Close()
 	queries = db.New(conn)
 
-	f, err := os.ReadFile(path.Join("sql", "schema.sql"))
+	f, err := schema.ReadFile("sql/schema.sql")
 	if err != nil {
 		panic(fmt.Errorf("read schema: %w", err))
 	}
@@ -99,6 +102,7 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		Time  time.Time
 		Ups   int
 		Downs int
+		Total int
 	}
 	// blocks of time (probably hourly) with lots of pings inside
 	// type blocks map[time.Time]pings
@@ -157,8 +161,7 @@ func serve(w http.ResponseWriter, r *http.Request) {
 	}
 	slog.Info("generated lookback table", "data", timesInRange)
 
-	// Fill in empty space,
-	// chunks are usually an hour
+	// Fill in empty space (chunks are usually an hour)
 	for url, chunk := range rpts {
 		slog.Debug("one", "k", url, "report", chunk)
 		for _, interval := range timesInRange {
@@ -175,22 +178,21 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		}
 		rpts[url] = chunk
 	}
-	pageData.Report = rpts
 
 	// sort every time frame by time, new to old
 	for url, chunk := range rpts {
 		sort.Slice(chunk, func(i, j int) bool {
 			return chunk[i].Time.After(chunk[j].Time)
 		})
+		for i := range chunk {
+			chunk[i].Total = chunk[i].Ups + chunk[i].Downs
+		}
 		rpts[url] = chunk
 	}
-
-	// TODO make empty unkown slots for existing services
-	// for every services that was up since
+	pageData.Report = rpts
 
 	var rawPages []rows
 	for _, s := range statuses {
-
 		rawPages = append(rawPages, rows{
 			Time: s.Ts.Format(time.RFC3339),
 			Url:  s.Url,
