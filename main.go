@@ -25,9 +25,10 @@ var static embed.FS
 
 var (
 	queries         *db.Queries
-	dbStr           = "file:status.db?cache=shared&mode=rw"
-	portDefault     = "8888"
-	intervalDefault = 5 * time.Minute
+	dbStr           = "file:status.db?cache=shared&mode=rwc"
+	serviceName     = "status"
+	portDefault     = "8002"
+	intervalDefault = 30 * time.Second
 )
 
 func init() {
@@ -59,7 +60,7 @@ func main() {
 	go statusesForever(ctx, targets, intervalDefault)
 
 	// listen and serve
-	port, ok := os.LookupEnv("PORT")
+	port, ok := os.LookupEnv(fmt.Sprintf("%s_PORT", serviceName))
 	if !ok {
 		port = portDefault
 	}
