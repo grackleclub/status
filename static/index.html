@@ -1,19 +1,19 @@
 <head>
   <style>
+    /* https://lospec.com/palette-list/shiny-16 */
     body {
-      background-color: rebeccapurple;
-      color: yellow;
+      background-color: #1f1723;
+      color: #4995f3;
+      font-family: 'Lucida Console', Monaco, monospace;
+      padding: 2rem;
     }
     h1 {
       text-align: center;
-      font-size: 2.5rem;
-    }
-    h2 {
-      text-align: center;
-      font-size: 1.75rem;
+      font-size: 5rem;
+      margin: 0;
     }
     a {
-      color: cyan;
+      color: #8c7f90;
     }
     table {
       width: 100%;
@@ -71,23 +71,23 @@
       max-height: 1.5em;
     }
     .up {
-      background-color: greenyellow;
+      background-color: #3ec54b;
     }
     .down {
-      background-color: red;
+      background-color: #b22741;
     }
     .partial {
-      background-color: orange;
+      background-color: #f09548;
     }
     .unknown { 
-      background-color: #2b2a33;
+      background-color: #8c7f90;
     }
   </style>
 </head>
 
 <body>
-  <h1>Status Page</h1>
-  <h2>Grackle Club</h2>
+  <h1>grackle.club | status</h1>
+  <!-- <h2>Grackle Club</h2> -->
 
   <section>
   {{ range $url, $pingsList := .Report }}

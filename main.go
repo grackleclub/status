@@ -18,7 +18,7 @@ import (
 )
 
 // lookback defines how many hourly chunks should be included in display
-const lookback int = 24 * 4
+const lookback int = 24 * 7
 
 //go:embed static
 var static embed.FS
